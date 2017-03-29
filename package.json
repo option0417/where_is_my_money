@@ -1,0 +1,19 @@
+{
+  "name": "where_is_my_money",
+  "version": "1.0.0",
+  "description": "Find out your money and keep it!",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/option0417/where_is_my_money.git"
+  },
+  "author": "option0417",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/option0417/where_is_my_money/issues"
+  },
+  "homepage": "https://github.com/option0417/where_is_my_money#readme"
+}
