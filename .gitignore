@@ -1,0 +1,6 @@
+# Skip Log
+*.log
+log/*
+
+# Skip shell script
+*.sh
