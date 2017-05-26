@@ -1,6 +1,7 @@
 const express = require('express');
 const api = express();
 
+
 // HTTP Body parser
 const bodyParser= require('body-parser');
 // parse application/x-www-form-urlencoded
@@ -8,9 +9,21 @@ api.use(bodyParser.urlencoded({extended: true}));
 // parse application/json 
 api.use(bodyParser.json());
 
+// Setup Mongodb
+const mongoClient = require('mongodb').MongoClient
+var url = 'mongodb://localhost:27017/db_wimm';
+var dbConn;
+
+mongoClient.connect(url,  function(err,  db) {
+  if (err == null) {
+	  console.log("Connected successfully to server");
+	  dbConn = db;
+	  console.log(dbConn);
+  }
+});
+
 // Model
 const mPayment = require('./model/payment.js');
-
 
 api.post('/record', function(req, res) {
 	console.log('do post');
@@ -59,3 +72,23 @@ function showPayment(payment) {
 	console.log(payment.amount);
 	console.log(payment.total_cost);
 }
+
+// Shutdown hook
+process.on('exit', function() {
+  console.log('WIMM Exit');
+
+  if (dbConn != null) {
+		dbConn.close();
+	}
+});
+
+process.on('SIGTERM',  function () {
+  console.log('WIMM SIGTERM');
+	process.exit(1);
+});
+
+process.on('SIGINT',  function () {
+  console.log('WIMM SIGINT');
+	process.exit(1);
+});
+
