@@ -14,23 +14,46 @@ const mongoClient = require('mongodb').MongoClient
 var url = 'mongodb://localhost:27017/db_wimm';
 var dbConn;
 
-mongoClient.connect(url,  function(err,  db) {
+mongoClient.connect(
+		url,
+		{poolSize : 5},
+		function(err,  db) {
   if (err == null) {
 	  console.log("Connected successfully to server");
 	  dbConn = db;
 	  console.log(dbConn);
-  }
+  } else {
+	  console.error(err);
+	}
 });
 
-// Model
+// Import Data Models
 const mPayment = require('./model/payment.js');
 
 api.post('/record', function(req, res) {
 	console.log('do post');
   showReq(req);
 
-	var payment = new mPayment.Payment(123, req.body.item_type, req.body.item_name, req.body.item_price, req.body.item_amount, req.body.total_cost);
+  var currTime = getCurrTimeMillis(); 
+	var payment = new mPayment.Payment(
+		createPaymentID() + '-' + currTime,
+		req.body.payment_type,
+		req.body.item_name,
+		req.body.item_price,
+		req.body.amount,
+		req.body.payment_cost, 
+		currTime,
+		currTime
+	);
 	showPayment(payment);
+
+	dbConn.collection('Payment').insertOne(payment, function(err,  result) {
+	  if (err == null) {
+			console.log(result);
+		} else {
+			console.error(err);
+		}
+	});
 
 	res.sendStatus(200);
 });
@@ -43,7 +66,14 @@ api.get('/record', function (req, res) {
 			'Access-Control-Allow-Origin' : req.get('Origin')
 		}
 	);
-  res.send('Hello World!')
+	
+	dbConn.collection('Payment').find().toArray( function(err,  payments) {
+		if (err == null) {
+			res.send(payments);
+		} else {
+		  res.send(err);
+		}
+	});
 });
 
 api.put('/record',  function(req, res) {
@@ -65,12 +95,30 @@ function showReq(req) {
 
 function showPayment(payment) {
   console.log('Show Payment');
-	console.log(payment.payment_id);
-	console.log(payment.payment_type);
-	console.log(payment.item_name);
-	console.log(payment.item_price);
-	console.log(payment.amount);
-	console.log(payment.total_cost);
+	console.log('Payment ID: ' + payment.payment_id);
+	console.log('Payment Type: ' + payment.payment_type);
+	console.log('Item Name: ' + payment.item_name);
+	console.log('Item Price: ' + payment.item_price);
+	console.log('Amount: ' + payment.amount);
+	console.log('Payment Cost: ' + payment.payment_cost);
+	console.log('Create Time: ' + payment.create_time);
+	console.log('Update Time: ' + payment.update_time);
+}
+
+function createPaymentID() {
+	var prefix = '';
+	var min = 97;
+	var max = 122;
+  
+	while (prefix.length != 3) {
+	  var random = Math.floor(Math.random() * (max - min) + min);
+    prefix += String.fromCharCode(random);
+	}
+	return prefix;
+}
+
+function getCurrTimeMillis() {
+	return new Date().getTime();
 }
 
 // Shutdown hook
@@ -78,6 +126,7 @@ process.on('exit', function() {
   console.log('WIMM Exit');
 
   if (dbConn != null) {
+		console.log('Closing DB Connection');
 		dbConn.close();
 	}
 });
