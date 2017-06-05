@@ -1,5 +1,6 @@
 const express = require('express');
 const api = express();
+const cors = require('cors');
 
 
 // HTTP Body parser
@@ -8,6 +9,11 @@ const bodyParser= require('body-parser');
 api.use(bodyParser.urlencoded({extended: true}));
 // parse application/json 
 api.use(bodyParser.json());
+// parse text/*
+api.use(bodyParser.text());
+
+// Enable CORS
+api.use(cors());
 
 // Setup Mongodb
 const mongoClient = require('mongodb').MongoClient
@@ -55,6 +61,11 @@ api.post('/record', function(req, res) {
 		}
 	});
 
+	res.set(
+		{
+			'Access-Control-Allow-Origin' : req.get('Origin')
+		}
+	);
 	res.sendStatus(200);
 });
 

@@ -18,6 +18,7 @@
   "homepage": "https://github.com/option0417/where_is_my_money#readme",
   "dependencies": {
     "body-parser": "^1.17.1",
+    "cors": "^2.8.3",
     "express": "^4.15.2",
     "mongodb": "^2.2.25"
   }
