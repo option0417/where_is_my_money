@@ -78,13 +78,23 @@ api.get('/record', function (req, res) {
 		}
 	);
 	
-	dbConn.collection('Payment').find().toArray( function(err,  payments) {
-		if (err == null) {
-			res.send(payments);
-		} else {
-		  res.send(err);
-		}
-	});
+	if (req.query.tp != null) {
+		dbConn.collection('Payment').find({"payment_type":req.query.tp}).toArray( function(err,  payments) {
+		  if (err == null) {
+			  res.send(payments);
+		  } else {
+		    res.send(err);
+		  }
+	  });
+  } else {  
+		dbConn.collection('Payment').find().toArray( function(err,  payments) {
+		  if (err == null) {
+			  res.send(payments);
+		  } else {
+		    res.send(err);
+		  }
+	  });
+	}
 });
 
 api.put('/record',  function(req, res) {
@@ -98,9 +108,13 @@ api.listen(3000, function () {
 });
 
 function showReq(req) {
-  console.log('Show header');
+  console.log("Show header");
 	console.log(req.headers);
-	console.log('Show body');
+
+	console.log("Show query");
+	console.log(req.query);
+
+	console.log("Show body");
 	console.log(req.body);
 }
 
