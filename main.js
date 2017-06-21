@@ -17,6 +17,7 @@ api.use(cors());
 
 // Setup Mongodb
 const mongoClient = require('mongodb').MongoClient
+const logger = require('mongodb').Logger
 var url = 'mongodb://localhost:27017/db_wimm';
 var dbConn;
 
@@ -28,6 +29,8 @@ mongoClient.connect(
 	  console.log("Connected successfully to server");
 	  dbConn = db;
 	  console.log(dbConn);
+
+		logger.setLevel("debug");
   } else {
 	  console.error(err);
 	}
@@ -81,6 +84,17 @@ api.get('/record', function (req, res) {
 	if (req.query.tp != null) {
 		dbConn.collection('Payment').find({"payment_type":req.query.tp}).toArray( function(err,  payments) {
 		  if (err == null) {
+			  res.send(payments);
+		  } else {
+		    res.send(err);
+		  }
+	  });
+  } else if (req.query.st_date != null && req.query.ed_date != null) {
+		dbConn.collection('Payment').find(
+				{$and: [{"create_time": {$gte : parseInt(req.query.st_date)}},  {"create_time": {$lte : parseInt(req.query.ed_date)}}]}
+				).toArray( function(err,  payments) {
+		  if (err == null) {
+				console.log("P: " + payments);
 			  res.send(payments);
 		  } else {
 		    res.send(err);
