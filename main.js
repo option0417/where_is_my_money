@@ -1,6 +1,7 @@
 const express = require('express');
 const api = express();
 const cors = require('cors');
+const service = require('./service/payment_service.js');
 
 
 // HTTP Body parser
@@ -15,54 +16,12 @@ api.use(bodyParser.text());
 // Enable CORS
 api.use(cors());
 
-// Setup Mongodb
-const mongoClient = require('mongodb').MongoClient
-const logger = require('mongodb').Logger
-var url = 'mongodb://localhost:27017/db_wimm';
-var dbConn;
-
-mongoClient.connect(
-		url,
-		{poolSize : 5},
-		function(err,  db) {
-  if (err == null) {
-	  console.log("Connected successfully to server");
-	  dbConn = db;
-	  console.log(dbConn);
-
-		logger.setLevel("debug");
-  } else {
-	  console.error(err);
-	}
-});
-
-// Import Data Models
-const mPayment = require('./model/payment.js');
 
 api.post('/record', function(req, res) {
 	console.log('do post');
   showReq(req);
 
-  var currTime = getCurrTimeMillis(); 
-	var payment = new mPayment.Payment(
-		createPaymentID() + '-' + currTime,
-		req.body.payment_type,
-		req.body.item_name,
-		req.body.item_price,
-		req.body.amount,
-		req.body.payment_cost, 
-		currTime,
-		currTime
-	);
-	showPayment(payment);
-
-	dbConn.collection('Payment').insertOne(payment, function(err,  result) {
-	  if (err == null) {
-			console.log(result);
-		} else {
-			console.error(err);
-		}
-	});
+	service.postPayment(req);
 
 	res.set(
 		{
@@ -75,40 +34,8 @@ api.post('/record', function(req, res) {
 api.get('/record', function (req, res) {
 	console.log('do get');
 	showReq(req);
-	res.set(
-		{
-			'Access-Control-Allow-Origin' : req.get('Origin')
-		}
-	);
-	
-	if (req.query.tp != null) {
-		dbConn.collection('Payment').find({"payment_type":req.query.tp}).toArray( function(err,  payments) {
-		  if (err == null) {
-			  res.send(payments);
-		  } else {
-		    res.send(err);
-		  }
-	  });
-  } else if (req.query.st_date != null && req.query.ed_date != null) {
-		dbConn.collection('Payment').find(
-				{$and: [{"create_time": {$gte : parseInt(req.query.st_date)}},  {"create_time": {$lte : parseInt(req.query.ed_date)}}]}
-				).toArray( function(err,  payments) {
-		  if (err == null) {
-				console.log("P: " + payments);
-			  res.send(payments);
-		  } else {
-		    res.send(err);
-		  }
-	  });
-  } else {  
-		dbConn.collection('Payment').find().toArray( function(err,  payments) {
-		  if (err == null) {
-			  res.send(payments);
-		  } else {
-		    res.send(err);
-		  }
-	  });
-	}
+
+  service.getPayment(req, res);
 });
 
 api.put('/record',  function(req, res) {
@@ -132,42 +59,10 @@ function showReq(req) {
 	console.log(req.body);
 }
 
-function showPayment(payment) {
-  console.log('Show Payment');
-	console.log('Payment ID: ' + payment.payment_id);
-	console.log('Payment Type: ' + payment.payment_type);
-	console.log('Item Name: ' + payment.item_name);
-	console.log('Item Price: ' + payment.item_price);
-	console.log('Amount: ' + payment.amount);
-	console.log('Payment Cost: ' + payment.payment_cost);
-	console.log('Create Time: ' + payment.create_time);
-	console.log('Update Time: ' + payment.update_time);
-}
-
-function createPaymentID() {
-	var prefix = '';
-	var min = 97;
-	var max = 122;
-  
-	while (prefix.length != 3) {
-	  var random = Math.floor(Math.random() * (max - min) + min);
-    prefix += String.fromCharCode(random);
-	}
-	return prefix;
-}
-
-function getCurrTimeMillis() {
-	return new Date().getTime();
-}
 
 // Shutdown hook
 process.on('exit', function() {
   console.log('WIMM Exit');
-
-  if (dbConn != null) {
-		console.log('Closing DB Connection');
-		dbConn.close();
-	}
 });
 
 process.on('SIGTERM',  function () {
