@@ -12,7 +12,6 @@ api.use(bodyParser.urlencoded({extended: true}));
 api.use(bodyParser.json());
 // parse text/*
 api.use(bodyParser.text());
-
 // Enable CORS
 api.use(cors());
 

@@ -5,13 +5,10 @@ module.exports = {
 
 const domain = require('../model/payment.js');
 
-// Setup Mongodb
-const mongoClient = require('mongodb').MongoClient
-const logger = require('mongodb').Logger
+// Setup connection for MongoDB
 var url = 'mongodb://localhost:27017/db_wimm';
 var dbConn;
-
-mongoClient.connect(
+require('mongodb').MongoClient.connect(
 		url, 
     {poolSize : 5}, 
     function(err,   db) {
@@ -19,8 +16,9 @@ mongoClient.connect(
 				console.log("Connected successfully to db");
 				dbConn = db;
 				console.log(dbConn);
-				
-				logger.setLevel("debug");
+
+        // Setup logger for MongoDB
+        require('mongodb').Logger.setLevel("debug");
 			} else {
 				console.error(err);
 			}
@@ -53,46 +51,30 @@ function postPayment(req) {
 
 // Get Payment
 function getPayment(req,  res) {
-	var result;
+	var queryObject = createQueryObject(req);
+	console.log(queryObject);
+	
+	dbConn.collection('Payment').find(queryObject).toArray(
+			function(err,  payments) {
+				if (err == null) {
+					result = payments;
+				} else {
+					result = err;
+				}
+				res.send(result);
+		});
+}
+
+function createQueryObject(req) {
+	var queryObject = {};
 	if (req.query.tp != null) {
-		dbConn.collection('Payment').find({"payment_type":req.query.tp}).toArray( function(err,  payments) {
-		  if (err == null) {
-			  result = payments;
-		  } else {
-		    result = err;
-		  }
-	res.set(
-			{ 'Access-Control-Allow-Origin' : req.get('Origin') }
-	);
-	res.send(result);
-	  });
-  } else if (req.query.st_date != null && req.query.ed_date != null) {
-		dbConn.collection('Payment').find(
-				{$and: [{"create_time": {$gte : parseInt(req.query.st_date)}},  {"create_time": {$lte : parseInt(req.query.ed_date)}}]}
-				).toArray( function(err,  payments) {
-		  if (err == null) {
-			  result = payments;
-		  } else {
-		    result = err;
-		  }
-	res.set(
-			{ 'Access-Control-Allow-Origin' : req.get('Origin') }
-	);
-	res.send(result);
-	  });
-  } else {  
-		dbConn.collection('Payment').find().toArray( function(err,  payments) {
-		  if (err == null) {
-				result = payments;
-		  } else {
-				result = err;
-		  }
-	res.set(
-			{ 'Access-Control-Allow-Origin' : req.get('Origin') }
-	);
-	res.send(result);
-	  });
-  }
+		queryObject.payment_type = req.query.tp;
+	}
+
+	if (req.query.st_date != null && req.query.ed_date != null) {
+		queryObject.$and = [{"create_time": {$gte : parseInt(req.query.st_date)}},  {"create_time": {$lte : parseInt(req.query.ed_date)}}];
+	}
+	return queryObject;
 }
 
 // Common function
