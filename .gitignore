@@ -3,4 +3,4 @@
 log/*
 
 # Skip shell script
-*.sh
+#*.sh
