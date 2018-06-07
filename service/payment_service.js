@@ -31,10 +31,9 @@ function postPayment(req) {
 	var payment = new domain.Payment(
 			createPaymentID() + '-' + currTime, 
 			req.body.payment_type, 
-			req.body.item_name, 
-			req.body.item_price, 
-			req.body.amount, 
+			req.body.payment_item, 
 			req.body.payment_cost,  
+			req.body.payment_description,  
 			currTime, 
 			currTime);
 	
@@ -98,10 +97,9 @@ function showPayment(payment) {
 	console.log('Show Payment');
 	console.log('Payment ID: ' + payment.payment_id);
 	console.log('Payment Type: ' + payment.payment_type);
-	console.log('Item Name: ' + payment.item_name);
-	console.log('Item Price: ' + payment.item_price);
-	console.log('Amount: ' + payment.amount);
+	console.log('Payment Item: ' + payment.payment_item);
 	console.log('Payment Cost: ' + payment.payment_cost);
+	console.log('Payment Description: ' + payment.payment_description);
 	console.log('Create Time: ' + payment.create_time);
 	console.log('Update Time: ' + payment.update_time);
 }
