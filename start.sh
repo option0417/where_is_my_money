@@ -7,3 +7,13 @@ LOG="wimm_$DATE.log"
 
 
 /usr/bin/node ./main.js >> log/$LOG 2>&1 &
+
+sleep 0.3s
+PID=$(pgrep -f 'node.*main.js')
+
+if [ -z $PID ]; then
+  echo "Start failed, check log."
+  exit 1
+else 
+  echo "Start WIMM[$PID] done."
+fi

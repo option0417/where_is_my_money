@@ -1,7 +1,9 @@
 const express = require('express');
 const api = express();
 const cors = require('cors');
-const service = require('./service/payment_service.js');
+const service = require('./service/service_payment.js');
+const api_payment = require('./api/api_payment');
+var common = require('./common/common.js')
 
 
 // HTTP Body parser
@@ -16,48 +18,15 @@ api.use(bodyParser.text());
 api.use(cors());
 
 
-api.post('/record', function(req, res) {
-	console.log('do post');
-  showReq(req);
+api.post('/record', api_payment.postPayment);
 
-	service.postPayment(req);
+api.get('/record', api_payment.getPayment);
 
-	res.set(
-		{
-			'Access-Control-Allow-Origin' : req.get('Origin')
-		}
-	);
-	res.sendStatus(200);
-});
-
-api.get('/record', function (req, res) {
-	console.log('do get');
-	showReq(req);
-
-  service.getPayment(req, res);
-});
-
-api.put('/record',  function(req, res) {
-  console.log('do put');
-	showReq(req);
-	res.sendStatus(200);
-});
+api.put('/record', api_payment.editPayment);
 
 api.listen(3000, function () {
   console.log('Example app listening on port 3000!')
 });
-
-function showReq(req) {
-  console.log("Show header");
-	console.log(req.headers);
-
-	console.log("Show query");
-	console.log(req.query);
-
-	console.log("Show body");
-	console.log(req.body);
-}
-
 
 // Shutdown hook
 process.on('exit', function() {

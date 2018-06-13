@@ -18,7 +18,7 @@ require('mongodb').MongoClient.connect(
 				console.log(dbConn);
 
         // Setup logger for MongoDB
-        require('mongodb').Logger.setLevel("debug");
+        require('mongodb').Logger.setLevel("info");
 			} else {
 				console.error(err);
 			}
@@ -51,6 +51,7 @@ function postPayment(req) {
 // Get Payment
 function getPayment(req,  res) {
 	var queryObject = createQueryObject(req);
+	console.log('QueryObject:');
 	console.log(queryObject);
 	
 	dbConn.collection('Payment').find(queryObject).toArray(
