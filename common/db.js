@@ -1,19 +1,24 @@
-  8 // Setup connection for MongoDB
-  9 var url = 'mongodb://localhost:27017/db_wimm';
- 10 var dbConn;
- 11 require('mongodb').MongoClient.connect(
- 12     url,
- 13     {poolSize : 5},
- 14     function(err,   db) {
- 15       if (err == null) {
- 16         console.log("Connected successfully to db");
- 17         dbConn = db;
- 18         console.log(dbConn);
- 19 
- 20         // Setup logger for MongoDB
- 21         require('mongodb').Logger.setLevel("info");
- 22       } else {
- 23         console.error(err);
- 24       }
- 25     }
- 26 );
+// Setup connection for MongoDB
+module.exports = {
+  connectToDB : function() {
+    var url = 'mongodb://localhost:27017/db_wimm';
+    var dbConn;
+    require('mongodb').MongoClient.connect(
+        url,
+        {poolSize : 5},
+        function(err,   db) {
+          if (err == null) {
+            console.log("Connected successfully to db");
+            dbConn = db;
+            console.log(dbConn);
+        
+            // Setup logger for MongoDB
+            require('mongodb').Logger.setLevel("info");
+          } else {
+            console.error(err);
+          }
+        }
+    );
+    return dbConn;
+  }
+}

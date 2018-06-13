@@ -4,26 +4,27 @@ module.exports = {
 }
 
 const domain = require('../model/payment.js');
-
+const dbConn = require('../common/db.js').connectToDB();
+console.log(dbConn);
 // Setup connection for MongoDB
-var url = 'mongodb://localhost:27017/db_wimm';
-var dbConn;
-require('mongodb').MongoClient.connect(
-		url, 
-    {poolSize : 5}, 
-    function(err,   db) {
-			if (err == null) {
-				console.log("Connected successfully to db");
-				dbConn = db;
-				console.log(dbConn);
+//var url = 'mongodb://localhost:27017/db_wimm';
+//var dbConn;
+//require('mongodb').MongoClient.connect(
+//		url, 
+//    {poolSize : 5}, 
+//    function(err,   db) {
+//			if (err == null) {
+//				console.log("Connected successfully to db");
+//				dbConn = db;
+//				console.log(dbConn);
 
         // Setup logger for MongoDB
-        require('mongodb').Logger.setLevel("info");
-			} else {
-				console.error(err);
-			}
-		}
-);
+//        require('mongodb').Logger.setLevel("info");
+//			} else {
+//				console.error(err);
+//			}
+//		}
+//);
 
 // Post Payment
 function postPayment(req) {
