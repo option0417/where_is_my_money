@@ -1,8 +1,8 @@
 // Setup connection for MongoDB
+var dbConn;
 module.exports = {
   connectToDB : function() {
     var url = 'mongodb://localhost:27017/db_wimm';
-    var dbConn;
     require('mongodb').MongoClient.connect(
         url,
         {poolSize : 5},
@@ -10,7 +10,6 @@ module.exports = {
           if (err == null) {
             console.log("Connected successfully to db");
             dbConn = db;
-            console.log(dbConn);
         
             // Setup logger for MongoDB
             require('mongodb').Logger.setLevel("info");
@@ -19,6 +18,6 @@ module.exports = {
           }
         }
     );
-    return dbConn;
-  }
+  },
+  getDBConn : function() {  return dbConn;  }
 }

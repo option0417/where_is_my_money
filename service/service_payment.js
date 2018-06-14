@@ -4,30 +4,12 @@ module.exports = {
 }
 
 const domain = require('../model/payment.js');
-const dbConn = require('../common/db.js').connectToDB();
-console.log(dbConn);
-// Setup connection for MongoDB
-//var url = 'mongodb://localhost:27017/db_wimm';
-//var dbConn;
-//require('mongodb').MongoClient.connect(
-//		url, 
-//    {poolSize : 5}, 
-//    function(err,   db) {
-//			if (err == null) {
-//				console.log("Connected successfully to db");
-//				dbConn = db;
-//				console.log(dbConn);
-
-        // Setup logger for MongoDB
-//        require('mongodb').Logger.setLevel("info");
-//			} else {
-//				console.error(err);
-//			}
-//		}
-//);
+const db = require('../common/db.js');
+db.connectToDB();
+console.log('Initial done.');
 
 // Post Payment
-function postPayment(req) {
+function postPayment(req, res) {
 	var currTime = getCurrTimeMillis();
 	var payment = new domain.Payment(
 			createPaymentID() + '-' + currTime, 
@@ -40,13 +22,14 @@ function postPayment(req) {
 	
 	showPayment(payment);
 	
-	dbConn.collection('Payment').insertOne(payment,  function(err,   result) {
+	db.getDBConn().collection('Payment').insertOne(payment,  function(err,   result) {
 		if (err == null) {
 		  console.log(result);
 		} else {
 			console.error(err);
 		}
 	});
+  sendResponse(req, res, {pid : payment.payment_id});
 }
 
 // Get Payment
@@ -55,14 +38,16 @@ function getPayment(req,  res) {
 	console.log('QueryObject:');
 	console.log(queryObject);
 	
-	dbConn.collection('Payment').find(queryObject).toArray(
-			function(err,  payments) {
+  var payments;
+	db.getDBConn().collection('Payment').find(queryObject).toArray(
+			function(err,  result) {
 				if (err == null) {
-					result = payments;
+					payments = result
 				} else {
-					result = err;
+			    console.error(err);
+          payments = err;
 				}
-				res.send(result);
+        sendResponse(req, res, payments);
 		});
 }
 
@@ -96,12 +81,23 @@ function createPaymentID() {
 }
 
 function showPayment(payment) {
-	console.log('Show Payment');
-	console.log('Payment ID: ' + payment.payment_id);
-	console.log('Payment Type: ' + payment.payment_type);
-	console.log('Payment Item: ' + payment.payment_item);
-	console.log('Payment Cost: ' + payment.payment_cost);
-	console.log('Payment Description: ' + payment.payment_description);
-	console.log('Create Time: ' + payment.create_time);
-	console.log('Update Time: ' + payment.update_time);
+	console.log('--Show Payment--');
+	console.log('\tPayment ID: ' + payment.payment_id);
+	console.log('\tPayment Type: ' + payment.payment_type);
+	console.log('\tPayment Item: ' + payment.payment_item);
+	console.log('\tPayment Cost: ' + payment.payment_cost);
+	console.log('\tPayment Description: ' + payment.payment_description);
+	console.log('\tCreate Time: ' + payment.create_time);
+	console.log('\tUpdate Time: ' + payment.update_time);
+}
+
+function sendResponse(req, res, resJson) {
+  res.set({'Access-Control-Allow-Origin' : req.get('Origin')});
+  res.status(200);
+
+  if (resJson != null) {
+    res.json(resJson);
+  } else {
+    res.send();
+  }
 }

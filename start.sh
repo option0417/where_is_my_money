@@ -1,7 +1,7 @@
 #!/bin/bash
 
-#NODE_ROOT=/usr/bin
-NODE_ROOT=/home/vagrant/node-v8.11.1/bin
+NODE_ROOT=/usr/bin
+#NODE_ROOT=/home/vagrant/node-v8.11.1/bin
 
 
 DATE=$(date +%Y%m%d)

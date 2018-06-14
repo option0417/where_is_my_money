@@ -6,14 +6,7 @@ module.exports = {
     console.log('Do Post');
     common.showReq(req);
 
-    service.postPayment(req);
-
-    res.set(
-      {
-        'Access-Control-Allow-Origin' : req.get('Origin')
-      }
-    );
-    res.sendStatus(200);
+    service.postPayment(req, res);
   },
 
   getPayment : function (req, res) {
