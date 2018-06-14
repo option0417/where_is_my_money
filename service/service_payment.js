@@ -4,6 +4,8 @@ module.exports = {
 }
 
 const domain = require('../model/payment.js');
+const col_payment = 'Payment';
+
 const db = require('../common/db.js');
 db.connectToDB();
 console.log('Initial done.');
@@ -22,7 +24,7 @@ function postPayment(req, res) {
 	
 	showPayment(payment);
 	
-	db.getDBConn().collection('Payment').insertOne(payment,  function(err,   result) {
+	db.getDBConn().collection(col_payment).insertOne(payment,  function(err,   result) {
 		if (err == null) {
 		  console.log(result);
 		} else {
@@ -39,7 +41,7 @@ function getPayment(req,  res) {
 	console.log(queryObject);
 	
   var payments;
-	db.getDBConn().collection('Payment').find(queryObject).toArray(
+	db.getDBConn().collection(col_payment).find(queryObject).toArray(
 			function(err,  result) {
 				if (err == null) {
 					payments = result
@@ -61,6 +63,12 @@ function createQueryObject(req) {
 		queryObject.$and = [{"create_time": {$gte : parseInt(req.query.st_date)}},  {"create_time": {$lte : parseInt(req.query.ed_date)}}];
 	}
 	return queryObject;
+}
+
+function editPayment(req, res) {
+  var paymentID = req.body.payment_id;
+  db.getDBConn().collection(col_payment).updateOne(
+  
 }
 
 // Common function
