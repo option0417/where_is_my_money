@@ -1,6 +1,7 @@
 module.exports = {
 	postPayment : postPayment, 
-	getPayment : getPayment
+	getPayment : getPayment,
+  editPayment : editPayment
 }
 
 const domain = require('../model/payment.js');
@@ -67,8 +68,59 @@ function createQueryObject(req) {
 
 function editPayment(req, res) {
   var paymentID = req.body.payment_id;
+  var paymentDescription = req.body.payment_description;
+
+  var payment = buildPaymentFromBody(req.body);
+
+  console.log(JSON.stringify(payment));
+
   db.getDBConn().collection(col_payment).updateOne(
+    {payment_id: paymentID}, 
+    {$set: JSON.parse(JSON.stringify(payment))}, 
+    function(err, result) {
+				if (err == null) {
+					console.log(result);
+				} else {
+			    console.error(err);
+				}
+    });
+  sendResponse(req, res);
+}
+
+function buildPaymentFromBody(body) {
+  var payment = new domain.Payment;
   
+  for (var val in body) {
+    console.log(val);
+    console.log(body[val]);
+
+    if (body[val] != null) {
+     switch (val) {
+       case 'payment_id':
+         payment.setPaymentID(body[val]);
+         break;
+       case 'payment_type':
+         payment.setPaymentType(body[val]);
+         break;
+       case 'payment_cost':
+         payment.setPaymentCost(body[val]);
+         break;
+       case 'payment_description':
+         payment.setPaymentDescription(body[val]);
+         break;
+       case 'payment_create_time':
+         payment.setPaymentCreateTime(body[val]);
+         break;
+       case 'payment_update_time':
+         payment.setPaymentUpdateTime(body[val]);
+         break;
+       default:
+         break;
+     }
+    }
+  }
+  console.log(payment);
+  return payment;
 }
 
 // Common function
